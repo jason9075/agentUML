@@ -20,7 +20,7 @@ else
   BASENAME=$(basename "${LATEST_PUML%.puml}")
   TARGET="output/$BASENAME.png"
   if [ -f "$TARGET" ]; then
-    "$IMV" -n "$TARGET" output/ &
+    "$IMV" -n "$TARGET" output/*.png &
     IMV_PID=$!
   else
     echo "TalkUML: $TARGET not ready yet, will open when compiled."
@@ -67,7 +67,7 @@ fi
 
           # imv 尚未啟動（啟動時找不到圖檔），現在圖檔已備妥，直接開啟
           if [ -z "$IMV_PID" ] || ! kill -0 "$IMV_PID" 2>/dev/null; then
-            "$IMV" -n "$TARGET" output/ &
+            "$IMV" -n "$TARGET" output/*.png &
             IMV_PID=$!
             echo "TalkUML: imv started (pid $IMV_PID)"
             continue

@@ -10,15 +10,14 @@
 ## 快速開始
 
 ```sh
-# 1. 進入 dev shell（所有工具皆由 Nix 管理）
-nix develop
-
-# 2. 初始化目錄
+# 初始化目錄
 just init
 
-# 3. 一鍵啟動監聽 + 預覽（tmux 自動分割視窗）
+# 一鍵啟動監聽 + 預覽（tmux 自動分割視窗）
 just dev
 ```
+
+> 若你用 direnv（`use flake`）已進入 dev shell，`Justfile` 會直接跑 `talkuml-*`；否則才會自動用 `nix develop --command ...` 啟動環境。
 
 之後只要在 `diagrams/` 內儲存任何 `.puml` 檔案，`output/` 內的圖片就會自動更新，`imv` 預覽視窗同步重載。
 
@@ -39,7 +38,7 @@ talkuml/
 
 ## 常用指令
 
-> 在 Nix dev shell 內，`Justfile` 會呼叫 `talkuml-*` 指令。非 Nix 環境請參考下方「非 Nix 環境使用」。
+> `Justfile` 會用 `nix develop --command ...` 呼叫 `talkuml-*` 指令。非 Nix 環境請參考下方「非 Nix 環境使用」。
 
 | 指令 | 說明 |
 |---|---|
