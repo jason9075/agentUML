@@ -19,10 +19,16 @@ just dev
 
 > 若你用 direnv（`use flake`）已進入 dev shell，`Justfile` 會直接跑 `talkuml-*`；否則才會自動用 `nix develop --command ...` 啟動環境。
 
-之後只要在 `diagrams/` 內儲存任何 `.puml` 檔案，`output/` 內的圖片就會自動更新，`imv` 預覽視窗同步重載。
+之後只要在 `diagrams/` 內儲存任何 `.puml` 檔案，`output/` 內的圖片就會自動更新，`imv` 預覽視窗同步切換。
 
 > `just dev` 會開啟一個 tmux session，左側跑 `talkuml-watch`，右側跑 `talkuml-preview`。
 > 你可以用 `just attach` 進入 tmux，或用 `just stop` 關閉整個 session。
+
+### 預覽行為
+
+- `talkuml-preview` 會找 `diagrams/` **最新修改的 `.puml`**，並嘗試開啟對應的 `output/<name>.png`。
+- 之後只監聽 `diagrams/` 的檔案事件（包含 atomic save 的 `moved_to`），用 `.puml` 檔名推導要顯示的圖片。
+- 若你用 direnv 的 `use flake`（pure）修改了 `scripts/` 或 `flake.nix`，需要 `git add` + `direnv reload`，並 `just stop && just dev` 才會套用到新的 `/nix/store` wrapper。
 
 ## 目錄結構
 
@@ -38,11 +44,13 @@ talkuml/
 
 ## 常用指令
 
-> `Justfile` 會用 `nix develop --command ...` 呼叫 `talkuml-*` 指令。非 Nix 環境請參考下方「非 Nix 環境使用」。
+> 在沒有 direnv 的情況下，`Justfile` 會用 `nix develop --command ...` 呼叫 `talkuml-*` 指令。非 Nix 環境請參考下方「非 Nix 環境使用」。
 
 | 指令 | 說明 |
 |---|---|
 | `just dev` | **一鍵啟動** watch + preview（tmux 分割視窗）|
+| `just attach` | 附加到 tmux session（查看 watch/preview log） |
+| `just stop` | 停止 tmux session |
 | `just watch` | 單獨啟動監聽，存檔即重新編譯 |
 | `just preview` | 單獨開啟 imv 圖片預覽器 |
 | `just build` | 一次性編譯所有 `.puml` |
@@ -127,9 +135,16 @@ just dev
 
 ## Sample
 
+### Workflow（Sequence）
+
+![SEQUENCE](./imgs/sequence.png)
+
+### GOT
+
 詢問冰與火之歌的人物關係圖
 ![GOT_ASK](./imgs/got_ask.png)
 ![GOT_OUTPUT](./imgs/got_output.png)
+
 ## License
 
 MIT
