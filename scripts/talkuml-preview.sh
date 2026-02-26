@@ -8,9 +8,6 @@ IMV="${IMV:-imv}"
 IMV_MSG="${IMV_MSG:-imv-msg}"
 INOTIFYWAIT="${INOTIFYWAIT:-inotifywait}"
 
-debug() {
-  echo "TalkUML(debug): $*"
-}
 
 mkdir -p output diagrams
 
@@ -28,6 +25,23 @@ if [ -n "$LATEST_PUML" ]; then
   TARGET="output/$BASENAME.png"
   echo "TalkUML: startup: latest puml=$LATEST_PUML"
   echo "TalkUML: startup: inferred target image=$TARGET"
+
+  # 啟動後立刻嘗試切到最新 diagram 的圖片（避免只印訊息但畫面停在舊圖）
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    [ -f "$TARGET" ] && break
+    sleep 1
+  done
+
+  if [ -f "$TARGET" ]; then
+    echo "TalkUML: startup: opening $TARGET"
+    # imv 啟動初期 IPC 可能尚未就緒，重試幾次
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+      "$IMV_MSG" "$IMV_PID" open "$TARGET" 2>/dev/null && "$IMV_MSG" "$IMV_PID" goto -1 2>/dev/null && break
+      sleep 0.2
+    done
+  else
+    echo "TalkUML: startup: $TARGET not ready yet"
+  fi
 else
   echo "TalkUML: startup: no puml found"
 fi
@@ -36,7 +50,7 @@ fi
 #   close_write → .puml 被修改（entr 觸發單檔編譯）
 #   create      → 新 .puml 建立
 "$INOTIFYWAIT" -m -r \
-  -e close_write -e create \
+  -e close_write -e create -e moved_to \
   --format "%e %w%f" diagrams/ \
   2>/dev/null \
   | while read -r event filename; do
