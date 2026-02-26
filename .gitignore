@@ -1,5 +1,6 @@
 # Generated images
 output/
+diagrams/
 
 # Secrets
 .env

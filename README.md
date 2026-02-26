@@ -31,12 +31,15 @@ just dev
 talkuml/
 ├── flake.nix        # 環境定義（唯一事實來源）
 ├── flake.lock       # 鎖定的 Nix input 版本
-├── justfile         # 常用指令包裝
+├── Justfile         # 常用指令包裝
+├── scripts/         # 非 Nix 環境可直接執行的腳本
 ├── diagrams/        # 放置 .puml 原始檔（需自行建立）
 └── output/          # 自動產生的 PNG/SVG（已 gitignore）
 ```
 
 ## 常用指令
+
+> 在 Nix dev shell 內，`Justfile` 會呼叫 `talkuml-*` 指令。非 Nix 環境請參考下方「非 Nix 環境使用」。
 
 | 指令 | 說明 |
 |---|---|
@@ -76,6 +79,41 @@ Service --> User : 回傳結果
 | State（狀態圖） | 是 |
 | Component（元件圖） | 是 |
 | Deployment（部署圖） | 是 |
+
+## 非 Nix 環境使用
+
+如果你在沒有 Nix 的環境也想使用本專案流程，可以直接執行 `scripts/` 內的腳本。
+
+### 需要的工具
+
+請確保以下指令在 `$PATH` 中可用：
+- `plantuml`（以及 Java runtime）
+- `graphviz`（Class/State/Component/Deployment 等圖表需要）
+- `entr`
+- `inotifywait`（通常來自 `inotify-tools`）
+- `imv`、`imv-msg`
+- `tmux`（如果要用一鍵 `dev`）
+
+### 用法
+
+```sh
+# 初始化目錄
+mkdir -p diagrams output
+
+# 一鍵啟動（tmux）
+./scripts/talkuml-dev.sh
+
+# 或分開跑
+./scripts/talkuml-watch.sh
+./scripts/talkuml-preview.sh
+```
+
+如果你希望沿用 `Justfile`，可自行把 `scripts/` 加到 PATH：
+
+```sh
+export PATH="$PWD/scripts:$PATH"
+just dev
+```
 
 ## 工具鏈
 

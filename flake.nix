@@ -10,100 +10,22 @@
     utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        
-        # 定義自動監聽腳本
-        watch-script = pkgs.writeShellScriptBin "talkuml-watch" ''
-          mkdir -p output
-          echo "TalkUML: Monitoring diagrams/ folder..."
-          
-          # 初始編譯一次
-          ${pkgs.plantuml}/bin/plantuml -o ./output "diagrams/**/*.puml"
 
-          # 使用 entr 監控變動
-          # -r 會在檔案列表變動時重啟
-          # /_ 代表觸發變動的那個檔案
-          find diagrams -name "*.puml" | ${pkgs.entr}/bin/entr -r ${pkgs.plantuml}/bin/plantuml -v -o ../output /_
-        '';
+        # 從 scripts/ 讀取腳本內容，供 Nix dev shell 產生同名指令
+        # 這些腳本也能在非 Nix 環境直接執行（依賴系統 PATH 內的工具）
+        stripShebang = script: builtins.replaceStrings [ "#!/usr/bin/env bash\n" ] [ "" ] script;
 
-        # 啟動預覽器的腳本（使用 imv，原生支援 Wayland）
-        # 用 inotifywait 監聽 output/，有新 PNG 寫入就透過 imv-msg 開啟並跳到最新圖片
-        preview-script = pkgs.writeShellScriptBin "talkuml-preview" ''
-          if [ ! -d "output" ]; then
-            echo "Error: output directory not found. Run talkuml-watch first."
-            exit 1
-          fi
+        watch-bin = pkgs.writeShellScriptBin "talkuml-watch" (
+          stripShebang (builtins.readFile ./scripts/talkuml-watch.sh)
+        );
 
-          # 取最新的圖片作為 imv 起始畫面，若 output/ 為空則直接開目錄
-          LATEST=$(ls -t output/*.png output/*.svg 2>/dev/null | head -1)
-          if [ -n "$LATEST" ]; then
-            # -n 指定起始圖片，同時把整個目錄傳入讓 imv 掃描所有圖
-            ${pkgs.imv}/bin/imv -n "$LATEST" output/ &
-          else
-            ${pkgs.imv}/bin/imv output/ &
-          fi
-          IMV_PID=$!
+        preview-bin = pkgs.writeShellScriptBin "talkuml-preview" (
+          stripShebang (builtins.readFile ./scripts/talkuml-preview.sh)
+        );
 
-          echo "TalkUML: imv started (pid $IMV_PID), watching output/ for new images..."
-
-          # 用 shell associative array 追蹤已開啟過的檔案
-          # - 檔案是「更新」(已存在於清單) → 只送 goto，不重複 open，避免黑畫面
-          # - 檔案是「新增」(首次出現)     → open 加入清單，再 goto -1 跳過去
-          declare -A KNOWN
-
-          # 把 imv 啟動時已載入的圖片標記為已知
-          for f in output/*.png output/*.svg; do
-            [ -f "$f" ] && KNOWN["$f"]=1
-          done
-
-          ${pkgs.inotify-tools}/bin/inotifywait -m -e close_write --format "%f" output/ 2>/dev/null \
-            | while read -r filename; do
-                case "$filename" in
-                  *.png|*.svg)
-                    if kill -0 "$IMV_PID" 2>/dev/null; then
-                      FILEPATH="output/$filename"
-                      if [ -n "''${KNOWN[$FILEPATH]}" ]; then
-                        # 已知檔案：plantuml 覆寫，直接 reload 當前畫面
-                        ${pkgs.imv}/bin/imv-msg "$IMV_PID" reload
-                      else
-                        # 新檔案：加入清單並跳到最後
-                        KNOWN["$FILEPATH"]=1
-                        ${pkgs.imv}/bin/imv-msg "$IMV_PID" open "$FILEPATH"
-                        ${pkgs.imv}/bin/imv-msg "$IMV_PID" goto -1
-                      fi
-                    else
-                      echo "TalkUML: imv exited, stopping preview watcher."
-                      exit 0
-                    fi
-                    ;;
-                esac
-              done
-        '';
-
-        # 一鍵啟動：用 tmux 同時跑 watch（左）與 preview（右）
-        # 每次執行都會 kill 舊 session 重新啟動，執行完後自動 detach 回原本 shell
-        dev-script = pkgs.writeShellScriptBin "talkuml-dev" ''
-          mkdir -p diagrams output
-
-          SESSION="talkuml"
-
-          # 若 session 已存在則強制終止，確保乾淨重啟
-          if ${pkgs.tmux}/bin/tmux has-session -t "$SESSION" 2>/dev/null; then
-            echo "TalkUML: restarting session..."
-            ${pkgs.tmux}/bin/tmux kill-session -t "$SESSION"
-          fi
-
-          # 建立新 session（-d 表示 detached，不自動 attach）
-          ${pkgs.tmux}/bin/tmux new-session -d -s "$SESSION" -x 220 -y 50
-          ${pkgs.tmux}/bin/tmux send-keys -t "$SESSION" "talkuml-watch" Enter
-
-          # 右側 pane 延遲 2 秒後跑 preview（等 output/ 初始化完成）
-          ${pkgs.tmux}/bin/tmux split-window -h -t "$SESSION"
-          ${pkgs.tmux}/bin/tmux send-keys -t "$SESSION" "sleep 2 && talkuml-preview" Enter
-
-          echo "TalkUML: session '$SESSION' started (detached)."
-          echo "  attach : tmux attach -t $SESSION"
-          echo "  stop   : tmux kill-session -t $SESSION"
-        '';
+        dev-bin = pkgs.writeShellScriptBin "talkuml-dev" (
+          stripShebang (builtins.readFile ./scripts/talkuml-dev.sh)
+        );
       in
       {
         devShells.default = pkgs.mkShell {
@@ -111,13 +33,13 @@
             plantuml
             entr
             imv           # Wayland 原生圖片預覽器
-            inotify-tools # preview 腳本監聽 output/ 新圖片所需
+            inotify-tools # preview 腳本監聽 diagrams/ 所需
             tmux          # talkuml-dev 一鍵啟動所需
             jre           # PlantUML 依賴 Java
             graphviz      # 用於繪製複雜圖形 (如 state, class diagrams)
-            watch-script
-            preview-script
-            dev-script
+            watch-bin
+            preview-bin
+            dev-bin
           ];
 
           shellHook = ''

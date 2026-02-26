@@ -27,6 +27,8 @@ talkuml/
 ├── flake.nix        # Full environment definition (single source of truth)
 ├── flake.lock       # Pinned Nix input revisions — commit changes to this
 ├── guildlines       # Chinese-language workflow design doc (zh-TW)
+├── Justfile         # Task runner wrapper around common commands
+├── scripts/         # Portable scripts for non-Nix environments
 ├── diagrams/        # Source .puml files (create this directory as needed)
 └── output/          # Generated PNG/SVG images (gitignored, auto-created)
 ```
@@ -51,14 +53,15 @@ Do **not** install tools globally. All tooling is pinned in `flake.nix`.
 
 ## Available Commands
 
-These two commands are exposed as binaries inside the dev shell:
+These commands are exposed as binaries inside the dev shell:
 
 | Command | Purpose |
 |---|---|
-| `talkuml-watch` | Compile all `.puml` files to `output/`, then watch `diagrams/` for changes |
-| `talkuml-preview` | Open `output/` in `feh` with 1-second auto-reload |
+| `talkuml-dev` | Start `talkuml-watch` + `talkuml-preview` together via tmux |
+| `talkuml-watch` | Watch `diagrams/` and compile only changed `.puml` to `output/` |
+| `talkuml-preview` | Open images in `imv` and follow changes in `diagrams/` |
 
-Run them in two separate terminals:
+Run them in two separate terminals (or use `talkuml-dev`):
 
 ```sh
 # Terminal 1 — compiler + watcher
@@ -66,6 +69,9 @@ talkuml-watch
 
 # Terminal 2 — image viewer
 talkuml-preview
+
+# Alternative — both in tmux
+talkuml-dev
 ```
 
 A `justfile` wraps all common tasks — run `just` to list targets.
