@@ -126,6 +126,11 @@ just dev
 | [Graphviz](https://graphviz.org) | 複雜圖表的排版後端 |
 | [Nix Flakes](https://nixos.wiki/wiki/Flakes) | 可重現的開發環境 |
 
+## Sample
+
+詢問冰與火之歌的人物關係圖
+![GOT_ASK](./imgs/got_ask.png)
+![GOT_OUTPUT](./imgs/got_output.png)
 ## License
 
 MIT
