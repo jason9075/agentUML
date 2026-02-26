@@ -1,0 +1,14 @@
+# Generated images
+output/
+
+# Secrets
+.env
+*.secret
+opencode.json
+
+# direnv
+.direnv/
+.envrc
+
+# macOS
+.DS_Store
