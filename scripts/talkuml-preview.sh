@@ -8,45 +8,28 @@ IMV="${IMV:-imv}"
 IMV_MSG="${IMV_MSG:-imv-msg}"
 INOTIFYWAIT="${INOTIFYWAIT:-inotifywait}"
 
-DEBUG="${TALKUML_DEBUG:-0}"
-
 debug() {
-  if [ "$DEBUG" = "1" ]; then
-    echo "TalkUML(debug): $*"
-  fi
+  echo "TalkUML(debug): $*"
 }
 
 mkdir -p output diagrams
 
-# 找 diagrams/ 最新修改的 .puml，推算對應的 output/<name>.png
-# 以 diagrams/ 的時間為準，不受 output/ 內大量檔案同時被重寫的 mtime 影響
+# 方案 A：啟動時只開 output/ 目錄（不使用 -n），避免 imv 在某些情況下 segfault
+# 之後靠 diagrams/ 的事件推導 output/<name>.png，再用 imv-msg open 切換
+"$IMV" output/ &
+IMV_PID=$!
+
+echo "TalkUML: imv started (pid $IMV_PID), watching diagrams/ for changes..."
+
+# 仍記錄啟動時最新的 .puml（純 debug 用）
 LATEST_PUML=$(find diagrams -type f -name '*.puml' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-)
-if [ -z "$LATEST_PUML" ]; then
-  echo "TalkUML: no .puml files found in diagrams/, waiting for changes..."
-  debug "startup: no puml found"
-  IMV_PID=""
-else
+if [ -n "$LATEST_PUML" ]; then
   BASENAME=$(basename "$LATEST_PUML" .puml)
   TARGET="output/$BASENAME.png"
-  debug "startup: latest puml=$LATEST_PUML"
-  debug "startup: target image=$TARGET"
-
-  # 若圖片尚未產生，先不開 imv，等 talkuml-watch 編譯後由 inotifywait 事件再開圖
-  if [ -f "$TARGET" ]; then
-    debug "startup: opening imv with $TARGET"
-    "$IMV" -n "$TARGET" output/ &
-    IMV_PID=$!
-  else
-    echo "TalkUML: $TARGET not ready yet, will open when compiled."
-    debug "startup: image not ready"
-    IMV_PID=""
-  fi
-fi
-
-if [ -n "$IMV_PID" ]; then
-  echo "TalkUML: imv started (pid $IMV_PID), watching diagrams/ for changes..."
+  echo "TalkUML: startup: latest puml=$LATEST_PUML"
+  echo "TalkUML: startup: inferred target image=$TARGET"
 else
-  echo "TalkUML: watching diagrams/ for changes..."
+  echo "TalkUML: startup: no puml found"
 fi
 
 # 只監聽 diagrams/：
@@ -59,18 +42,18 @@ fi
   | while read -r event filename; do
       case "$filename" in
         *.puml)
-          # 若 imv 已開，確認它還在；若使用者關閉就停止 watcher
+          # 若 imv crash/被關閉，不要退出 watcher；下次事件再自動重啟
           if [ -n "$IMV_PID" ] && ! kill -0 "$IMV_PID" 2>/dev/null; then
-            echo "TalkUML: imv exited, stopping preview watcher."
-            exit 0
+            echo "TalkUML: imv exited, will restart on next event."
+            IMV_PID=""
           fi
 
-          debug "event: $event file=$filename"
+           echo "TalkUML: event: $event file=$filename"
 
           # 從 .puml 檔名直接算出對應 PNG 路徑（只取 basename，不包含子目錄）
           BASENAME=$(basename "$filename" .puml)
           TARGET="output/$BASENAME.png"
-          debug "event: target image=$TARGET"
+          echo "TalkUML: event: target image=$TARGET"
 
           # 等待 plantuml 完成輸出（最多 10 秒）
           for _ in 1 2 3 4 5 6 7 8 9 10; do
@@ -80,32 +63,25 @@ fi
 
           if [ ! -f "$TARGET" ]; then
             echo "TalkUML: warning: $TARGET not found after timeout"
-            debug "event: timeout waiting for $TARGET"
+            echo "TalkUML: event: timeout waiting for $TARGET"
             continue
           fi
 
-          # imv 尚未啟動（啟動時找不到圖檔），現在圖檔已備妥，直接開啟
+          # imv 不在時，先重啟 imv（不使用 -n），再切到目標圖片
           if [ -z "$IMV_PID" ] || ! kill -0 "$IMV_PID" 2>/dev/null; then
-            debug "event: starting imv with $TARGET"
-            "$IMV" -n "$TARGET" output/ &
+            echo "TalkUML: event: starting imv (no -n)"
+            "$IMV" output/ &
             IMV_PID=$!
             echo "TalkUML: imv started (pid $IMV_PID)"
-            continue
+            # 給 imv 一點時間建立 IPC
+            sleep 0.2
           fi
 
-          case "$event" in
-            CLOSE_WRITE,CLOSE)
-              debug "event: reload"
-              # 修改現有檔案：reload 原地刷新，不重複 open
-              "$IMV_MSG" "$IMV_PID" reload
-              ;;
-            CREATE)
-              debug "event: open + goto -1"
-              # 新檔案：加入 imv 清單並切換過去
-              "$IMV_MSG" "$IMV_PID" open "$TARGET"
-              "$IMV_MSG" "$IMV_PID" goto -1
-              ;;
-          esac
+          # 不分 CREATE / CLOSE_WRITE：一律切到該 .puml 對應的圖片
+          # 這避免只 reload 當前圖而沒切換到最新編輯的 diagram
+          echo "TalkUML: event: open + goto -1"
+          "$IMV_MSG" "$IMV_PID" open "$TARGET"
+          "$IMV_MSG" "$IMV_PID" goto -1
           ;;
       esac
     done

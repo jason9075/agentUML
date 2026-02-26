@@ -22,7 +22,7 @@ just dev
 之後只要在 `diagrams/` 內儲存任何 `.puml` 檔案，`output/` 內的圖片就會自動更新，`imv` 預覽視窗同步重載。
 
 > `just dev` 會開啟一個 tmux session，左側跑 `talkuml-watch`，右側跑 `talkuml-preview`。
-> 離開請按 `Ctrl+b d` detach，或 `Ctrl+b x` 關閉 pane。
+> 你可以用 `just attach` 進入 tmux，或用 `just stop` 關閉整個 session。
 
 ## 目錄結構
 

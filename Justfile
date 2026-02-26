@@ -14,10 +14,21 @@ shell:
 # 若已在 dev shell（direnv/use flake）則不重複 nix develop
 dev:
     bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then talkuml-dev; else nix develop --command talkuml-dev; fi'
+    @echo "Tip: tmux 已在背景啟動"
+    @echo "  attach: just attach"
+    @echo "  stop  : just stop"
 
 # 啟動檔案監聽與自動編譯
 watch:
     bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then talkuml-watch; else nix develop --command talkuml-watch; fi'
+
+# 附加到 talkuml tmux session
+attach:
+    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then tmux attach -t talkuml; else nix develop --command tmux attach -t talkuml; fi'
+
+# 停止 talkuml tmux session
+stop:
+    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then tmux kill-session -t talkuml; else nix develop --command tmux kill-session -t talkuml; fi'
 
 # 開啟圖片預覽器（需先在另一個終端執行 watch）
 preview:
