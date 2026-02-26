@@ -5,7 +5,7 @@
 ## 需求
 
 - [Nix](https://nixos.org/download)（需啟用 Flakes）
-- X11 顯示環境（`feh` 預覽器使用）
+- Wayland 顯示環境（`imv` 預覽器使用）
 
 ## 快速開始
 
@@ -82,7 +82,7 @@ Service --> User : 回傳結果
 |---|---|
 | [PlantUML](https://plantuml.com) | `.puml` → PNG/SVG 編譯器 |
 | [entr](https://eradman.com/entrproject/) | 檔案變動監聽 |
-| [feh](https://feh.finalrewind.org) | X11 圖片預覽（自動重載） |
+| [imv](https://sr.ht/~exec64/imv/) | Wayland 原生圖片預覽（目錄瀏覽） |
 | [Graphviz](https://graphviz.org) | 複雜圖表的排版後端 |
 | [Nix Flakes](https://nixos.wiki/wiki/Flakes) | 可重現的開發環境 |
 

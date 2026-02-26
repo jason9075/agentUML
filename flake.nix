@@ -25,11 +25,11 @@
           find diagrams -name "*.puml" | ${pkgs.entr}/bin/entr -r ${pkgs.plantuml}/bin/plantuml -v -o ../output /_
         '';
 
-        # 啟動預覽器的腳本
+        # 啟動預覽器的腳本（使用 imv，原生支援 Wayland）
         preview-script = pkgs.writeShellScriptBin "talkuml-preview" ''
           if [ -d "output" ]; then
-            # feh -R 1 會每秒檢查一次檔案變動並重新讀取
-            ${pkgs.feh}/bin/feh -R 1 output/
+            # imv-wayland 會監控目錄，檔案更新後按 R 或透過 imv-msg 重載
+            ${pkgs.imv}/bin/imv output/
           else
             echo "Error: output directory not found. Run talkuml-watch first."
           fi
@@ -40,7 +40,7 @@
           buildInputs = with pkgs; [
             plantuml
             entr
-            feh
+            imv  # Wayland 原生圖片預覽器
             jre # PlantUML 依賴 Java
             graphviz # 用於繪製複雜圖形 (如 state, class diagrams)
             watch-script

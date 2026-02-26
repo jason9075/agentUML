@@ -14,7 +14,7 @@ The entire project is orchestrated through `flake.nix`.
 - **Nix Flakes** — environment definition and tooling orchestration
 - **PlantUML** — diagram-as-code DSL (`.puml` / `.wsd` files)
 - **entr** — inotify-based file watcher
-- **feh** — X11 image viewer with auto-reload
+- **imv** — Wayland 原生圖片檢視器
 - **Graphviz** — backend for state, class, and component diagrams
 - **JRE** — Java runtime required by PlantUML
 
