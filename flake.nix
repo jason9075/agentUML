@@ -45,15 +45,31 @@
 
           echo "TalkUML: imv started (pid $IMV_PID), watching output/ for new images..."
 
-          # 監聽 output/ 目錄：當 PNG/SVG 寫入關閉（close_write）時開啟並切到最新
+          # 用 shell associative array 追蹤已開啟過的檔案
+          # - 檔案是「更新」(已存在於清單) → 只送 goto，不重複 open，避免黑畫面
+          # - 檔案是「新增」(首次出現)     → open 加入清單，再 goto -1 跳過去
+          declare -A KNOWN
+
+          # 把 imv 啟動時已載入的圖片標記為已知
+          for f in output/*.png output/*.svg; do
+            [ -f "$f" ] && KNOWN["$f"]=1
+          done
+
           ${pkgs.inotify-tools}/bin/inotifywait -m -e close_write --format "%f" output/ 2>/dev/null \
             | while read -r filename; do
                 case "$filename" in
                   *.png|*.svg)
                     if kill -0 "$IMV_PID" 2>/dev/null; then
-                      # 開啟新圖後立刻跳到清單最後一張（最新加入的）
-                      ${pkgs.imv}/bin/imv-msg "$IMV_PID" open "output/$filename"
-                      ${pkgs.imv}/bin/imv-msg "$IMV_PID" goto -1
+                      FILEPATH="output/$filename"
+                      if [ -n "''${KNOWN[$FILEPATH]}" ]; then
+                        # 已知檔案：plantuml 覆寫，直接 reload 當前畫面
+                        ${pkgs.imv}/bin/imv-msg "$IMV_PID" reload
+                      else
+                        # 新檔案：加入清單並跳到最後
+                        KNOWN["$FILEPATH"]=1
+                        ${pkgs.imv}/bin/imv-msg "$IMV_PID" open "$FILEPATH"
+                        ${pkgs.imv}/bin/imv-msg "$IMV_PID" goto -1
+                      fi
                     else
                       echo "TalkUML: imv exited, stopping preview watcher."
                       exit 0
