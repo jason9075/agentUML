@@ -16,14 +16,14 @@ nix develop
 # 2. 初始化目錄
 just init
 
-# 3. Terminal 1 — 啟動監聽與自動編譯
-just watch
-
-# 4. Terminal 2 — 開啟圖片預覽器
-just preview
+# 3. 一鍵啟動監聽 + 預覽（tmux 自動分割視窗）
+just dev
 ```
 
-之後只要在 `diagrams/` 內儲存任何 `.puml` 檔案，`output/` 內的圖片就會自動更新，預覽視窗每秒自動重載。
+之後只要在 `diagrams/` 內儲存任何 `.puml` 檔案，`output/` 內的圖片就會自動更新，`imv` 預覽視窗同步重載。
+
+> `just dev` 會開啟一個 tmux session，左側跑 `talkuml-watch`，右側跑 `talkuml-preview`。
+> 離開請按 `Ctrl+b d` detach，或 `Ctrl+b x` 關閉 pane。
 
 ## 目錄結構
 
@@ -40,8 +40,9 @@ talkuml/
 
 | 指令 | 說明 |
 |---|---|
-| `just watch` | 啟動監聽，存檔即重新編譯 |
-| `just preview` | 開啟 feh 圖片預覽器（自動重載） |
+| `just dev` | **一鍵啟動** watch + preview（tmux 分割視窗）|
+| `just watch` | 單獨啟動監聽，存檔即重新編譯 |
+| `just preview` | 單獨開啟 imv 圖片預覽器 |
 | `just build` | 一次性編譯所有 `.puml` |
 | `just compile <file>` | 編譯單一圖表 |
 | `just clean` | 清除 `output/` |
@@ -82,6 +83,7 @@ Service --> User : 回傳結果
 |---|---|
 | [PlantUML](https://plantuml.com) | `.puml` → PNG/SVG 編譯器 |
 | [entr](https://eradman.com/entrproject/) | 檔案變動監聽 |
+| [tmux](https://github.com/tmux/tmux) | `just dev` 一鍵分割視窗 |
 | [imv](https://sr.ht/~exec64/imv/) | Wayland 原生圖片預覽（目錄瀏覽） |
 | [Graphviz](https://graphviz.org) | 複雜圖表的排版後端 |
 | [Nix Flakes](https://nixos.wiki/wiki/Flakes) | 可重現的開發環境 |

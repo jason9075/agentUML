@@ -10,6 +10,10 @@ default:
 shell:
     nix develop
 
+# 一鍵啟動：tmux 同時跑 watch（左）與 preview（右）
+dev:
+    talkuml-dev
+
 # 啟動檔案監聽與自動編譯
 watch:
     talkuml-watch
