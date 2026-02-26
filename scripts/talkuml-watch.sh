@@ -11,12 +11,12 @@ mkdir -p output diagrams
 echo "TalkUML: Monitoring diagrams/ folder..."
 
 # 初始全量編譯一次
-"$PLANTUML" -r -o "$PWD/output" "diagrams/**/*.puml"
+"$PLANTUML" -r --output-dir "$PWD/output" "diagrams/**/*.puml"
 
 # 外層迴圈：entr -d 偵測到 diagrams/ 有新檔案時退出並重啟，
 # 讓新建的 .puml 也納入監聽清單；/_ 只編譯觸發變動的那個檔案
 while true; do
   find diagrams -name "*.puml" \
     | "$ENTR" -d \
-        "$PLANTUML" -v -o "$PWD/output" /_
+        "$PLANTUML" -v --output-dir "$PWD/output" /_
 done

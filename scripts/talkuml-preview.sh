@@ -8,21 +8,31 @@ IMV="${IMV:-imv}"
 IMV_MSG="${IMV_MSG:-imv-msg}"
 INOTIFYWAIT="${INOTIFYWAIT:-inotifywait}"
 
-if [ ! -d "output" ]; then
-  echo "Error: output directory not found. Run talkuml-watch first."
-  exit 1
-fi
+mkdir -p output
 
-# 取最新的圖片作為 imv 起始畫面，若 output/ 為空則直接開目錄
-LATEST=$(ls -t output/*.png output/*.svg 2>/dev/null | head -1)
-if [ -n "$LATEST" ]; then
-  "$IMV" -n "$LATEST" output/ &
+# 找 diagrams/ 最新修改的 .puml，推算對應的 output/*.png
+# 若 output/*.png 不存在就不開 imv，等 talkuml-watch 編譯後由 inotifywait 事件再開圖
+LATEST_PUML=$(ls -t diagrams/**/*.puml diagrams/*.puml 2>/dev/null | head -1)
+if [ -z "$LATEST_PUML" ]; then
+  echo "TalkUML: no .puml files found in diagrams/, waiting for changes..."
+  IMV_PID=""
 else
-  "$IMV" output/ &
+  BASENAME=$(basename "${LATEST_PUML%.puml}")
+  TARGET="output/$BASENAME.png"
+  if [ -f "$TARGET" ]; then
+    "$IMV" -n "$TARGET" output/ &
+    IMV_PID=$!
+  else
+    echo "TalkUML: $TARGET not ready yet, will open when compiled."
+    IMV_PID=""
+  fi
 fi
-IMV_PID=$!
 
-echo "TalkUML: imv started (pid $IMV_PID), watching diagrams/ for changes..."
+if [ -n "$IMV_PID" ]; then
+  echo "TalkUML: imv started (pid $IMV_PID), watching diagrams/ for changes..."
+else
+  echo "TalkUML: watching diagrams/ for changes..."
+fi
 
 # 只監聽 diagrams/：
 #   close_write → .puml 被修改（entr 觸發單檔編譯）
@@ -34,7 +44,8 @@ echo "TalkUML: imv started (pid $IMV_PID), watching diagrams/ for changes..."
   | while read -r event filename; do
       case "$filename" in
         *.puml)
-          if ! kill -0 "$IMV_PID" 2>/dev/null; then
+          # 若 imv 已開，確認它還在；若使用者關閉就停止 watcher
+          if [ -n "$IMV_PID" ] && ! kill -0 "$IMV_PID" 2>/dev/null; then
             echo "TalkUML: imv exited, stopping preview watcher."
             exit 0
           fi
@@ -51,6 +62,14 @@ echo "TalkUML: imv started (pid $IMV_PID), watching diagrams/ for changes..."
 
           if [ ! -f "$TARGET" ]; then
             echo "TalkUML: warning: $TARGET not found after timeout"
+            continue
+          fi
+
+          # imv 尚未啟動（啟動時找不到圖檔），現在圖檔已備妥，直接開啟
+          if [ -z "$IMV_PID" ] || ! kill -0 "$IMV_PID" 2>/dev/null; then
+            "$IMV" -n "$TARGET" output/ &
+            IMV_PID=$!
+            echo "TalkUML: imv started (pid $IMV_PID)"
             continue
           fi
 
