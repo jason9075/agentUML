@@ -1,5 +1,7 @@
 # Generated images
 output/
+
+# Working diagrams (keep local-only)
 diagrams/
 
 # Secrets

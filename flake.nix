@@ -1,5 +1,5 @@
 {
-  description = "agentUML - Reactive PlantUML development environment";
+  description = "agentUML - Reactive D2 development environment";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -15,25 +15,29 @@
         # 這些腳本也能在非 Nix 環境直接執行（依賴系統 PATH 內的工具）
         stripShebang = script: builtins.replaceStrings [ "#!/usr/bin/env bash\n" ] [ "" ] script;
 
-        dev-bin = pkgs.writeShellScriptBin "agentuml-dev" (
-          stripShebang (builtins.readFile ./scripts/agentuml-dev.sh)
-        );
+        dev-bin = pkgs.writeShellScriptBin "agentuml-dev" ''
+          export D2="${pkgs.d2}/bin/d2"
+          export IMV="${pkgs.imv}/bin/imv"
+          export IMV_MSG="${pkgs.imv}/bin/imv-msg"
+          export INOTIFYWAIT="${pkgs.inotify-tools}/bin/inotifywait"
+
+          exec bash "${./scripts/agentuml-dev.sh}" "$@"
+        '';
+
       in
       {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            plantuml
+            d2
             imv           # Wayland 原生圖片預覽器
             inotify-tools # agentuml-dev 監聽 diagrams/ 所需
-            jre           # PlantUML 依賴 Java
-            graphviz      # 用於繪製複雜圖形 (如 state, class diagrams)
             dev-bin
           ];
 
           shellHook = ''
             echo "🎨 Welcome to agentUML Development Environment"
             echo "Available commands:"
-            echo "  agentuml-dev - Start compile + preview"
+            echo "  agentuml-dev - Start D2 watch + preview"
           '';
         };
       }

@@ -15,13 +15,14 @@ shell:
 dev:
     bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then agentuml-dev; else nix develop --command agentuml-dev; fi'
 
-# 一次性編譯所有 diagrams/ 下的 .puml 檔案
+# 一次性編譯所有 diagrams/ 下的 .d2 檔案（預設）
 build:
-    bash -lc 'if [ -z "${IN_NIX_SHELL:-}" ]; then nix develop --command bash -lc '"'"'mkdir -p output && plantuml -o ./output "diagrams/**/*.puml"'"'"'; else mkdir -p output && plantuml -o ./output "diagrams/**/*.puml"; fi'
+    bash -lc 'if [ -z "${IN_NIX_SHELL:-}" ]; then nix develop --command bash ./scripts/agentuml-build-d2.sh; else bash ./scripts/agentuml-build-d2.sh; fi'
 
-# 編譯單一圖表，用法：just compile diagrams/foo.puml
+# 編譯單一圖表（預設 D2），用法：just compile diagrams/foo.d2
 compile file:
-    bash -lc 'if [ -z "${IN_NIX_SHELL:-}" ]; then nix develop --command bash -lc '"'"'mkdir -p output && plantuml -o ./output "{{file}}"'"'"'; else mkdir -p output && plantuml -o ./output "{{file}}"; fi'
+    bash -lc 'if [ -z "${IN_NIX_SHELL:-}" ]; then nix develop --command bash ./scripts/agentuml-compile-d2.sh "{{file}}"; else bash ./scripts/agentuml-compile-d2.sh "{{file}}"; fi'
+
 
 # 清除所有產出的圖片
 clean:
@@ -30,7 +31,7 @@ clean:
 # 建立 diagrams/ 目錄（若尚未存在）
 init:
     mkdir -p diagrams output
-    @echo "Ready. Place .puml files in diagrams/ and run: just watch"
+    @echo "Ready. Place .d2 files in diagrams/ and run: just dev"
 
 # 驗證 flake.nix 語法
 check:

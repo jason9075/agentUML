@@ -6,16 +6,15 @@ Instructions for agentic coding agents operating in this repository.
 
 ## Project Overview
 
-agentUML is a **Nix Flake dev environment** for reactive PlantUML diagram authoring.
+agentUML is a **Nix Flake dev environment** for reactive diagram authoring.
+D2 is the default renderer.
 It is not an application — there is no runtime code, no package.json, no build step.
 The entire project is orchestrated through `flake.nix`.
 
 **Tech stack:**
 - **Nix Flakes** — environment definition and tooling orchestration
-- **PlantUML** — diagram-as-code DSL (`.puml` / `.wsd` files)
+- **D2** — default diagram-as-code DSL (`.d2` files)
 - **imv** — Wayland 原生圖片檢視器
-- **Graphviz** — backend for state, class, and component diagrams
-- **JRE** — Java runtime required by PlantUML
 
 ---
 
@@ -28,7 +27,7 @@ agentUML/
 ├── guildlines       # Chinese-language workflow design doc (zh-TW)
 ├── Justfile         # Task runner wrapper around common commands
 ├── scripts/         # Portable scripts for non-Nix environments
-├── diagrams/        # Source .puml files (create this directory as needed)
+├── diagrams/        # Source .d2 files
 └── output/          # Generated PNG/SVG images (gitignored, auto-created)
 ```
 
@@ -56,7 +55,7 @@ These commands are exposed as binaries inside the dev shell:
 
 | Command | Purpose |
 |---|---|
-| `agentuml-dev` | Start watch + preview together (single process) |
+| `agentuml-dev` | Start D2 watch + preview |
 
 Run them in a single terminal (recommended):
 
@@ -71,41 +70,24 @@ A `justfile` wraps all common tasks — run `just` to list targets.
 
 ---
 
-## PlantUML Diagram Authoring
+## Diagram Authoring
 
 ### File placement
 
-- Source diagrams go in `diagrams/` with the `.puml` extension.
-- Subdirectories are supported: `diagrams/auth/login.puml` is valid.
+- Diagrams go in `diagrams/` with the `.d2` extension.
+- Subdirectories are supported (watcher preserves D2 subdirs): `diagrams/auth/login.d2`.
 - Output images are placed in `output/` with the same basename.
 
 ### Minimal diagram template
 
-```plantuml
-@startuml diagram-name
-' Use kebab-case for diagram names
-title My Diagram
+D2 (default):
 
-actor User
-participant Service
-
-User -> Service : request
-Service --> User : response
-
-@enduml
+```d2
+# diagrams/diagram-name.d2
+User -> Service: request
+Service -> User: response
 ```
 
-### Diagram types and their Graphviz dependency
-
-| Diagram type | Requires Graphviz |
-|---|---|
-| Sequence | No |
-| Use case | No |
-| Activity | No |
-| Class | Yes |
-| State | Yes |
-| Component | Yes |
-| Deployment | Yes |
 
 ---
 
@@ -161,6 +143,6 @@ The following must **never** be committed:
 2. **Do not create `package.json` or `Makefile`** unless the project explicitly expands to include JS/TS or other tooling. The `justfile` is the task runner — add new targets there instead of creating ad-hoc scripts.
 3. **Validate Nix syntax** after editing `flake.nix` by running `nix flake check` inside the dev shell.
 4. **Do not run `nix flake update`** unless explicitly asked — it changes `flake.lock` and could break reproducibility.
-5. **Diagram files are the work product.** When asked to create a diagram, write a well-formed `.puml` file in `diagrams/` and confirm it compiles with `plantuml diagrams/<file>.puml -o ./output`.
+5. **Diagram files are the work product.** Default output is D2: write a well-formed `.d2` file in `diagrams/` and confirm it renders to `output/`.
 6. **Respect zh-TW comments** in `flake.nix` — preserve them when editing surrounding code.
-7. **No test runner exists.** Manual verification means: run `agentuml-dev`, save a `.puml` file, confirm a `.png` appears in `output/`.
+7. **No test runner exists.** Manual verification means: run `agentuml-dev`, save a `.d2` file, confirm a `.png` appears in `output/`.
