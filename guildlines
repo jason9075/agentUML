@@ -3,7 +3,7 @@
 
     輸入 (Input): 在 opencode 中撰寫 PlantUML 語法並存為 .puml 或 .wsd 檔案。
 
-    監聽 (Watch): 使用 entr 監控特定目錄下的檔案變動。
+    監聽 (Watch): 使用 inotifywait 監控特定目錄下的檔案變動。
 
     處理 (Process): 當檔案變動時，執行 plantuml 指令生成 .png 或 .svg。
 
@@ -26,4 +26,4 @@ agentUML/
 
     尋找 diagrams/ 下的所有檔案。
 
-    管線傳輸給 entr：ls diagrams/*.puml | entr plantuml -o ../output /_。
+    觸發後執行 plantuml：plantuml --output-dir output <changed-file>。

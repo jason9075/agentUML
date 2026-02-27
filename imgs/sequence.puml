@@ -4,30 +4,26 @@ title agentUML 專案工作流程（Sequence）
 autonumber
 
 actor User
-participant "OpenCode Agent\n(agentuml-skill enabled)" as Agent
+participant "OpenCode Agent\n(draw agent)" as Agent
 participant "diagrams/" as Diagrams
-participant "agentuml-dev\n(tmux session)" as Dev
-participant "agentuml-watch\n(entr)" as Watch
+participant "agentuml-dev" as Dev
+participant "inotifywait" as Inotify
 participant "plantuml" as PlantUML
 participant "output/" as Output
-participant "agentuml-preview\n(inotifywait)" as Preview
 participant "imv" as Imv
 
 User -> Dev : just dev
-Dev -> Watch : start (left pane)
-Dev -> Preview : start (right pane)
+Dev -> Inotify : watch diagrams/
 
 User -> Agent : 描述想要的圖表
 Agent -> Diagrams : write <name>.puml
 User -> Diagrams : save file
 
-Watch -> Diagrams : detect change
-Watch -> PlantUML : compile changed .puml
+Inotify -> Diagrams : observe create/modify/moved_to
+Dev -> PlantUML : compile changed .puml
 PlantUML -> Output : write <name>.png
-
-Preview -> Diagrams : observe create/modify/moved_to
-Preview -> Imv : imv-msg open output/<name>.png
-Preview -> Imv : imv-msg goto -1
+Dev -> Imv : imv-msg open output/<name>.png
+Dev -> Imv : imv-msg goto -1
 Imv --> User : display latest image
 
 @enduml

@@ -10,29 +10,10 @@ default:
 shell:
     nix develop
 
-# 一鍵啟動：tmux 同時跑 watch（左）與 preview（右）
+# 一鍵啟動：單一程序同時跑編譯 + 預覽
 # 若已在 dev shell（direnv/use flake）則不重複 nix develop
 dev:
     bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then agentuml-dev; else nix develop --command agentuml-dev; fi'
-    @echo "Tip: tmux 已在背景啟動"
-    @echo "  attach: just attach"
-    @echo "  stop  : just stop"
-
-# 啟動檔案監聽與自動編譯
-watch:
-    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then agentuml-watch; else nix develop --command agentuml-watch; fi'
-
-# 附加到 agentuml tmux session
-attach:
-    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then tmux attach -t agentuml; else nix develop --command tmux attach -t agentuml; fi'
-
-# 停止 agentuml tmux session
-stop:
-    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then tmux kill-session -t agentuml; else nix develop --command tmux kill-session -t agentuml; fi'
-
-# 開啟圖片預覽器（需先在另一個終端執行 watch）
-preview:
-    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then agentuml-preview; else nix develop --command agentuml-preview; fi'
 
 # 一次性編譯所有 diagrams/ 下的 .puml 檔案
 build:

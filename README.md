@@ -13,7 +13,7 @@
 # 初始化目錄
 just init
 
-# 一鍵啟動監聽 + 預覽（tmux 自動分割視窗）
+# 一鍵啟動監聽 + 預覽
 just dev
 ```
 
@@ -21,14 +21,13 @@ just dev
 
 之後只要在 `diagrams/` 內儲存任何 `.puml` 檔案，`output/` 內的圖片就會自動更新，`imv` 預覽視窗同步切換。
 
-> `just dev` 會開啟一個 tmux session，左側跑 `agentuml-watch`，右側跑 `agentuml-preview`。
-> 你可以用 `just attach` 進入 tmux，或用 `just stop` 關閉整個 session。
+> `just dev` 會啟動 `agentuml-dev`：單一程序同時負責編譯與預覽。
 
 ### 預覽行為
 
-- `agentuml-preview` 會找 `diagrams/` **最新修改的 `.puml`**，並嘗試開啟對應的 `output/<name>.png`。
+- `agentuml-dev` 會監聽 `diagrams/` 的 `.puml` 變更，編譯後用 `imv-msg` 自動切到對應的 `output/<name>.png`。
 - 之後只監聽 `diagrams/` 的檔案事件（包含 atomic save 的 `moved_to`），用 `.puml` 檔名推導要顯示的圖片。
-- 若你用 direnv 的 `use flake`（pure）修改了 `scripts/` 或 `flake.nix`，需要 `git add` + `direnv reload`，並 `just stop && just dev` 才會套用到新的 `/nix/store` wrapper。
+- 若你用 direnv 的 `use flake`（pure）修改了 `scripts/` 或 `flake.nix`，需要 `git add` + `direnv reload`，並重新執行 `just dev` 才會套用到新的 `/nix/store` wrapper。
 
 ## 目錄結構
 
@@ -48,11 +47,7 @@ agentUML/
 
 | 指令 | 說明 |
 |---|---|
-| `just dev` | **一鍵啟動** watch + preview（tmux 分割視窗）|
-| `just attach` | 附加到 tmux session（查看 watch/preview log） |
-| `just stop` | 停止 tmux session |
-| `just watch` | 單獨啟動監聽，存檔即重新編譯 |
-| `just preview` | 單獨開啟 imv 圖片預覽器 |
+| `just dev` | **一鍵啟動**編譯 + 預覽（單一程序）|
 | `just build` | 一次性編譯所有 `.puml` |
 | `just compile <file>` | 編譯單一圖表 |
 | `just clean` | 清除 `output/` |
@@ -96,10 +91,8 @@ Service --> User : 回傳結果
 請確保以下指令在 `$PATH` 中可用：
 - `plantuml`（以及 Java runtime）
 - `graphviz`（Class/State/Component/Deployment 等圖表需要）
-- `entr`
 - `inotifywait`（通常來自 `inotify-tools`）
 - `imv`、`imv-msg`
-- `tmux`（如果要用一鍵 `dev`）
 
 ### 用法
 
@@ -107,12 +100,9 @@ Service --> User : 回傳結果
 # 初始化目錄
 mkdir -p diagrams output
 
-# 一鍵啟動（tmux）
+# 一鍵啟動
 ./scripts/agentuml-dev.sh
 
-# 或分開跑
-./scripts/agentuml-watch.sh
-./scripts/agentuml-preview.sh
 ```
 
 如果你希望沿用 `Justfile`，可自行把 `scripts/` 加到 PATH：
@@ -127,8 +117,7 @@ just dev
 | 工具 | 用途 |
 |---|---|
 | [PlantUML](https://plantuml.com) | `.puml` → PNG/SVG 編譯器 |
-| [entr](https://eradman.com/entrproject/) | 檔案變動監聽 |
-| [tmux](https://github.com/tmux/tmux) | `just dev` 一鍵分割視窗 |
+| [inotify-tools](https://github.com/inotify-tools/inotify-tools) | 檔案變動監聽 (`inotifywait`) |
 | [imv](https://sr.ht/~exec64/imv/) | Wayland 原生圖片預覽（目錄瀏覽） |
 | [Graphviz](https://graphviz.org) | 複雜圖表的排版後端 |
 | [Nix Flakes](https://nixos.wiki/wiki/Flakes) | 可重現的開發環境 |

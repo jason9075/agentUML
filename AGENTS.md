@@ -13,7 +13,6 @@ The entire project is orchestrated through `flake.nix`.
 **Tech stack:**
 - **Nix Flakes** — environment definition and tooling orchestration
 - **PlantUML** — diagram-as-code DSL (`.puml` / `.wsd` files)
-- **entr** — inotify-based file watcher
 - **imv** — Wayland 原生圖片檢視器
 - **Graphviz** — backend for state, class, and component diagrams
 - **JRE** — Java runtime required by PlantUML
@@ -33,7 +32,7 @@ agentUML/
 └── output/          # Generated PNG/SVG images (gitignored, auto-created)
 ```
 
-`diagrams/` and `output/` are not committed; `output/` is auto-created by `agentuml-watch`.
+`diagrams/` and `output/` are not committed; `output/` is auto-created by `agentuml-dev`.
 
 ---
 
@@ -57,24 +56,18 @@ These commands are exposed as binaries inside the dev shell:
 
 | Command | Purpose |
 |---|---|
-| `agentuml-dev` | Start `agentuml-watch` + `agentuml-preview` together via tmux |
-| `agentuml-watch` | Watch `diagrams/` and compile only changed `.puml` to `output/` |
-| `agentuml-preview` | Open images in `imv` and follow changes in `diagrams/` |
+| `agentuml-dev` | Start watch + preview together (single process) |
 
-Run them in two separate terminals (or use `agentuml-dev`):
+Run them in a single terminal (recommended):
 
 ```sh
-# Terminal 1 — compiler + watcher
-agentuml-watch
-
-# Terminal 2 — image viewer
-agentuml-preview
-
-# Alternative — both in tmux
 agentuml-dev
 ```
 
+
 A `justfile` wraps all common tasks — run `just` to list targets.
+
+`agentuml-dev` no longer requires tmux.
 
 ---
 
@@ -123,7 +116,7 @@ Service --> User : response
 - **Indentation:** 2 spaces throughout.
 - **String literals:** Double-quoted Nix strings for short values; `''...''` (indented strings) for multi-line shell scripts.
 - **Comments:** Written in Traditional Chinese (zh-TW) for inline annotations; English for structural headings if needed.
-- **Attribute naming:** `camelCase` for Nix built-in attributes (`buildInputs`, `shellHook`, `devShells`). `kebab-case` for let-bindings and shell script bin names (e.g., `watch-script`, `agentuml-watch`).
+- **Attribute naming:** `camelCase` for Nix built-in attributes (`buildInputs`, `shellHook`, `devShells`). `kebab-case` for let-bindings and shell script bin names (e.g., `watch-script`, `agentuml-dev`).
 - **Input naming:** Use short, lowercase names (`nixpkgs`, `utils`).
 
 ### Adding a new tool
@@ -170,4 +163,4 @@ The following must **never** be committed:
 4. **Do not run `nix flake update`** unless explicitly asked — it changes `flake.lock` and could break reproducibility.
 5. **Diagram files are the work product.** When asked to create a diagram, write a well-formed `.puml` file in `diagrams/` and confirm it compiles with `plantuml diagrams/<file>.puml -o ./output`.
 6. **Respect zh-TW comments** in `flake.nix` — preserve them when editing surrounding code.
-7. **No test runner exists.** Manual verification means: run `agentuml-watch`, save a `.puml` file, confirm a `.png` appears in `output/`.
+7. **No test runner exists.** Manual verification means: run `agentuml-dev`, save a `.puml` file, confirm a `.png` appears in `output/`.
