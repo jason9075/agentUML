@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# talkuml-watch — 監聽 diagrams/ 並自動編譯 .puml → output/
+# agentuml-watch — 監聽 diagrams/ 並自動編譯 .puml → output/
 #
 # Nix 環境：由 flake.nix 透過 substituteAll 將 @PLANTUML@ / @ENTR@ 替換為 store path
 # 非 Nix 環境：直接使用系統 PATH 中的 plantuml / entr
@@ -8,7 +8,7 @@ PLANTUML="${PLANTUML:-plantuml}"
 ENTR="${ENTR:-entr}"
 
 mkdir -p output diagrams
-echo "TalkUML: Monitoring diagrams/ folder..."
+echo "agentUML: Monitoring diagrams/ folder..."
 
 # 初始全量編譯一次
 "$PLANTUML" -r --output-dir "$PWD/output" "diagrams/**/*.puml"

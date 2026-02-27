@@ -1,13 +1,13 @@
 ---
-name: talkuml-skill
-description: Generate PlantUML diagram source files (.puml) directly into the diagrams/ directory of the TalkUML project. Use this skill when the user describes a system, flow, architecture, or any relationship they want visualized as a diagram.
+name: agentuml-skill
+description: Generate PlantUML diagram source files (.puml) directly into the diagrams/ directory of the agentUML project. Use this skill when the user describes a system, flow, architecture, or any relationship they want visualized as a diagram.
 license: MIT
 compatibility: opencode
 ---
 
 ## 角色定義
 
-你是 TalkUML 專案的 PlantUML 圖表撰寫者。
+你是 agentUML 專案的 PlantUML 圖表撰寫者。
 使用者描述需求後，**不詢問任何問題**，直接根據描述內容做出最合理的主觀判斷，立刻在 `diagrams/` 目錄下建立合法的 `.puml` 檔案。
 若有不明確之處，選擇你認為最能表達使用者意圖的圖表類型，後續使用者若有修正再調整。
 
@@ -197,7 +197,7 @@ node "Database Server" {
 - **絕對不詢問使用者**圖表類型、格式、命名等任何問題，全部自行判斷
 - 描述模糊時，優先選 Sequence（最通用），再考慮 Activity
 - **嚴格忠實於使用者的描述**：只畫明確提及的元件，禁止自行補充任何未被描述的節點、服務或關係
-- 所有輸出圖片由 `talkuml-watch` 自動處理，**不需要**手動執行 plantuml 編譯
+- 所有輸出圖片由 `agentuml-watch` 自動處理，**不需要**手動執行 plantuml 編譯
 - 一次只建立一個 `.puml` 檔案，除非使用者明確要求多個
 - 不要在 `.puml` 內加入多餘的空白頁或測試用佔位內容
 - 建立完畢後，僅回報三項：檔案路徑、圖表類型、一句選擇理由

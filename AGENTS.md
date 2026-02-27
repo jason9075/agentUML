@@ -1,4 +1,4 @@
-# AGENTS.md — TalkUML
+# AGENTS.md — agentUML
 
 Instructions for agentic coding agents operating in this repository.
 
@@ -6,7 +6,7 @@ Instructions for agentic coding agents operating in this repository.
 
 ## Project Overview
 
-TalkUML is a **Nix Flake dev environment** for reactive PlantUML diagram authoring.
+agentUML is a **Nix Flake dev environment** for reactive PlantUML diagram authoring.
 It is not an application — there is no runtime code, no package.json, no build step.
 The entire project is orchestrated through `flake.nix`.
 
@@ -23,7 +23,7 @@ The entire project is orchestrated through `flake.nix`.
 ## Directory Structure
 
 ```
-talkuml/
+agentUML/
 ├── flake.nix        # Full environment definition (single source of truth)
 ├── flake.lock       # Pinned Nix input revisions — commit changes to this
 ├── guildlines       # Chinese-language workflow design doc (zh-TW)
@@ -33,7 +33,7 @@ talkuml/
 └── output/          # Generated PNG/SVG images (gitignored, auto-created)
 ```
 
-`diagrams/` and `output/` are not committed; `output/` is auto-created by `talkuml-watch`.
+`diagrams/` and `output/` are not committed; `output/` is auto-created by `agentuml-watch`.
 
 ---
 
@@ -57,21 +57,21 @@ These commands are exposed as binaries inside the dev shell:
 
 | Command | Purpose |
 |---|---|
-| `talkuml-dev` | Start `talkuml-watch` + `talkuml-preview` together via tmux |
-| `talkuml-watch` | Watch `diagrams/` and compile only changed `.puml` to `output/` |
-| `talkuml-preview` | Open images in `imv` and follow changes in `diagrams/` |
+| `agentuml-dev` | Start `agentuml-watch` + `agentuml-preview` together via tmux |
+| `agentuml-watch` | Watch `diagrams/` and compile only changed `.puml` to `output/` |
+| `agentuml-preview` | Open images in `imv` and follow changes in `diagrams/` |
 
-Run them in two separate terminals (or use `talkuml-dev`):
+Run them in two separate terminals (or use `agentuml-dev`):
 
 ```sh
 # Terminal 1 — compiler + watcher
-talkuml-watch
+agentuml-watch
 
 # Terminal 2 — image viewer
-talkuml-preview
+agentuml-preview
 
 # Alternative — both in tmux
-talkuml-dev
+agentuml-dev
 ```
 
 A `justfile` wraps all common tasks — run `just` to list targets.
@@ -123,7 +123,7 @@ Service --> User : response
 - **Indentation:** 2 spaces throughout.
 - **String literals:** Double-quoted Nix strings for short values; `''...''` (indented strings) for multi-line shell scripts.
 - **Comments:** Written in Traditional Chinese (zh-TW) for inline annotations; English for structural headings if needed.
-- **Attribute naming:** `camelCase` for Nix built-in attributes (`buildInputs`, `shellHook`, `devShells`). `kebab-case` for let-bindings and shell script bin names (e.g., `watch-script`, `talkuml-watch`).
+- **Attribute naming:** `camelCase` for Nix built-in attributes (`buildInputs`, `shellHook`, `devShells`). `kebab-case` for let-bindings and shell script bin names (e.g., `watch-script`, `agentuml-watch`).
 - **Input naming:** Use short, lowercase names (`nixpkgs`, `utils`).
 
 ### Adding a new tool
@@ -170,4 +170,4 @@ The following must **never** be committed:
 4. **Do not run `nix flake update`** unless explicitly asked — it changes `flake.lock` and could break reproducibility.
 5. **Diagram files are the work product.** When asked to create a diagram, write a well-formed `.puml` file in `diagrams/` and confirm it compiles with `plantuml diagrams/<file>.puml -o ./output`.
 6. **Respect zh-TW comments** in `flake.nix` — preserve them when editing surrounding code.
-7. **No test runner exists.** Manual verification means: run `talkuml-watch`, save a `.puml` file, confirm a `.png` appears in `output/`.
+7. **No test runner exists.** Manual verification means: run `agentuml-watch`, save a `.puml` file, confirm a `.png` appears in `output/`.

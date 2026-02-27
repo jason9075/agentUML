@@ -1,16 +1,16 @@
 @startuml sequence
-title TalkUML 專案工作流程（Sequence）
+title agentUML 專案工作流程（Sequence）
 
 autonumber
 
 actor User
-participant "OpenCode Agent\n(talkuml-skill enabled)" as Agent
+participant "OpenCode Agent\n(agentuml-skill enabled)" as Agent
 participant "diagrams/" as Diagrams
-participant "talkuml-dev\n(tmux session)" as Dev
-participant "talkuml-watch\n(entr)" as Watch
+participant "agentuml-dev\n(tmux session)" as Dev
+participant "agentuml-watch\n(entr)" as Watch
 participant "plantuml" as PlantUML
 participant "output/" as Output
-participant "talkuml-preview\n(inotifywait)" as Preview
+participant "agentuml-preview\n(inotifywait)" as Preview
 participant "imv" as Imv
 
 User -> Dev : just dev

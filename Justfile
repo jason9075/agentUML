@@ -1,4 +1,4 @@
-# TalkUML — task runner
+# agentUML — task runner
 # Run `just` to list available targets.
 # Most targets wrap `nix develop --command ...` so you can run them outside the dev shell.
 
@@ -13,26 +13,26 @@ shell:
 # 一鍵啟動：tmux 同時跑 watch（左）與 preview（右）
 # 若已在 dev shell（direnv/use flake）則不重複 nix develop
 dev:
-    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then talkuml-dev; else nix develop --command talkuml-dev; fi'
+    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then agentuml-dev; else nix develop --command agentuml-dev; fi'
     @echo "Tip: tmux 已在背景啟動"
     @echo "  attach: just attach"
     @echo "  stop  : just stop"
 
 # 啟動檔案監聽與自動編譯
 watch:
-    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then talkuml-watch; else nix develop --command talkuml-watch; fi'
+    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then agentuml-watch; else nix develop --command agentuml-watch; fi'
 
-# 附加到 talkuml tmux session
+# 附加到 agentuml tmux session
 attach:
-    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then tmux attach -t talkuml; else nix develop --command tmux attach -t talkuml; fi'
+    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then tmux attach -t agentuml; else nix develop --command tmux attach -t agentuml; fi'
 
-# 停止 talkuml tmux session
+# 停止 agentuml tmux session
 stop:
-    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then tmux kill-session -t talkuml; else nix develop --command tmux kill-session -t talkuml; fi'
+    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then tmux kill-session -t agentuml; else nix develop --command tmux kill-session -t agentuml; fi'
 
 # 開啟圖片預覽器（需先在另一個終端執行 watch）
 preview:
-    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then talkuml-preview; else nix develop --command talkuml-preview; fi'
+    bash -lc 'if [ -n "${IN_NIX_SHELL:-}" ]; then agentuml-preview; else nix develop --command agentuml-preview; fi'
 
 # 一次性編譯所有 diagrams/ 下的 .puml 檔案
 build:

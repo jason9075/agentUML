@@ -1,4 +1,4 @@
-# TalkUML
+# agentUML
 
 以 Nix Flake 驅動的響應式 PlantUML 圖表開發環境。儲存 `.puml` 檔案，圖片立即自動更新。
 
@@ -17,23 +17,23 @@ just init
 just dev
 ```
 
-> 若你用 direnv（`use flake`）已進入 dev shell，`Justfile` 會直接跑 `talkuml-*`；否則才會自動用 `nix develop --command ...` 啟動環境。
+> 若你用 direnv（`use flake`）已進入 dev shell，`Justfile` 會直接跑 `agentuml-*`；否則才會自動用 `nix develop --command ...` 啟動環境。
 
 之後只要在 `diagrams/` 內儲存任何 `.puml` 檔案，`output/` 內的圖片就會自動更新，`imv` 預覽視窗同步切換。
 
-> `just dev` 會開啟一個 tmux session，左側跑 `talkuml-watch`，右側跑 `talkuml-preview`。
+> `just dev` 會開啟一個 tmux session，左側跑 `agentuml-watch`，右側跑 `agentuml-preview`。
 > 你可以用 `just attach` 進入 tmux，或用 `just stop` 關閉整個 session。
 
 ### 預覽行為
 
-- `talkuml-preview` 會找 `diagrams/` **最新修改的 `.puml`**，並嘗試開啟對應的 `output/<name>.png`。
+- `agentuml-preview` 會找 `diagrams/` **最新修改的 `.puml`**，並嘗試開啟對應的 `output/<name>.png`。
 - 之後只監聽 `diagrams/` 的檔案事件（包含 atomic save 的 `moved_to`），用 `.puml` 檔名推導要顯示的圖片。
 - 若你用 direnv 的 `use flake`（pure）修改了 `scripts/` 或 `flake.nix`，需要 `git add` + `direnv reload`，並 `just stop && just dev` 才會套用到新的 `/nix/store` wrapper。
 
 ## 目錄結構
 
 ```
-talkuml/
+agentUML/
 ├── flake.nix        # 環境定義（唯一事實來源）
 ├── flake.lock       # 鎖定的 Nix input 版本
 ├── Justfile         # 常用指令包裝
@@ -44,7 +44,7 @@ talkuml/
 
 ## 常用指令
 
-> 在沒有 direnv 的情況下，`Justfile` 會用 `nix develop --command ...` 呼叫 `talkuml-*` 指令。非 Nix 環境請參考下方「非 Nix 環境使用」。
+> 在沒有 direnv 的情況下，`Justfile` 會用 `nix develop --command ...` 呼叫 `agentuml-*` 指令。非 Nix 環境請參考下方「非 Nix 環境使用」。
 
 | 指令 | 說明 |
 |---|---|
@@ -108,11 +108,11 @@ Service --> User : 回傳結果
 mkdir -p diagrams output
 
 # 一鍵啟動（tmux）
-./scripts/talkuml-dev.sh
+./scripts/agentuml-dev.sh
 
 # 或分開跑
-./scripts/talkuml-watch.sh
-./scripts/talkuml-preview.sh
+./scripts/agentuml-watch.sh
+./scripts/agentuml-preview.sh
 ```
 
 如果你希望沿用 `Justfile`，可自行把 `scripts/` 加到 PATH：

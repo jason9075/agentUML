@@ -12,7 +12,7 @@
 2. 目錄結構建議
 Plaintext
 
-talkuml/
+agentUML/
 ├── flake.nix
 ├── flake.lock
 ├── diagrams/        # 存放 .puml 原始檔

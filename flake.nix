@@ -1,5 +1,5 @@
 {
-  description = "TalkUML - Reactive PlantUML development environment";
+  description = "agentUML - Reactive PlantUML development environment";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -15,16 +15,16 @@
         # 這些腳本也能在非 Nix 環境直接執行（依賴系統 PATH 內的工具）
         stripShebang = script: builtins.replaceStrings [ "#!/usr/bin/env bash\n" ] [ "" ] script;
 
-        watch-bin = pkgs.writeShellScriptBin "talkuml-watch" (
-          stripShebang (builtins.readFile ./scripts/talkuml-watch.sh)
+        watch-bin = pkgs.writeShellScriptBin "agentuml-watch" (
+          stripShebang (builtins.readFile ./scripts/agentuml-watch.sh)
         );
 
-        preview-bin = pkgs.writeShellScriptBin "talkuml-preview" (
-          stripShebang (builtins.readFile ./scripts/talkuml-preview.sh)
+        preview-bin = pkgs.writeShellScriptBin "agentuml-preview" (
+          stripShebang (builtins.readFile ./scripts/agentuml-preview.sh)
         );
 
-        dev-bin = pkgs.writeShellScriptBin "talkuml-dev" (
-          stripShebang (builtins.readFile ./scripts/talkuml-dev.sh)
+        dev-bin = pkgs.writeShellScriptBin "agentuml-dev" (
+          stripShebang (builtins.readFile ./scripts/agentuml-dev.sh)
         );
       in
       {
@@ -34,7 +34,7 @@
             entr
             imv           # Wayland 原生圖片預覽器
             inotify-tools # preview 腳本監聽 diagrams/ 所需
-            tmux          # talkuml-dev 一鍵啟動所需
+            tmux          # agentuml-dev 一鍵啟動所需
             jre           # PlantUML 依賴 Java
             graphviz      # 用於繪製複雜圖形 (如 state, class diagrams)
             watch-bin
@@ -43,11 +43,11 @@
           ];
 
           shellHook = ''
-            echo "🎨 Welcome to TalkUML Development Environment"
+            echo "🎨 Welcome to agentUML Development Environment"
             echo "Available commands:"
-            echo "  talkuml-dev     - Start watch + preview together (tmux)"
-            echo "  talkuml-watch   - Start monitoring .puml files and auto-generate images"
-            echo "  talkuml-preview - Open the image viewer with auto-reload"
+            echo "  agentuml-dev     - Start watch + preview together (tmux)"
+            echo "  agentuml-watch   - Start monitoring .puml files and auto-generate images"
+            echo "  agentuml-preview - Open the image viewer with auto-reload"
           '';
         };
       }
