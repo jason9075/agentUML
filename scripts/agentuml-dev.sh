@@ -5,6 +5,7 @@
 # 需求：d2、inotifywait(inotify-tools)、imv、imv-msg
 
 D2="${D2:-d2}"
+RSVG_CONVERT="${RSVG_CONVERT:-rsvg-convert}"
 IMV="${IMV:-imv}"
 IMV_MSG="${IMV_MSG:-imv-msg}"
 INOTIFYWAIT="${INOTIFYWAIT:-inotifywait}"
@@ -44,17 +45,29 @@ open_image() {
 compile_and_show() {
   local d2_file="$1"
   local relative
+  local svg_target
   local target
+  local compile_output
 
   relative="${d2_file#diagrams/}"
   target="output/${relative%.d2}.png"
+  svg_target="${target%.png}.tmp.svg"
 
   mkdir -p "$(dirname "$target")"
 
-  if ! "$D2" "$d2_file" "$target" >/dev/null 2>&1; then
+  if ! compile_output=$("$D2" "$d2_file" "$svg_target" 2>&1); then
     echo "agentUML: compile failed: $d2_file" >&2
+    echo "$compile_output" >&2
     return 1
   fi
+
+  if ! compile_output=$("$RSVG_CONVERT" -f png -o "$target" "$svg_target" 2>&1); then
+    echo "agentUML: svg->png failed: $d2_file" >&2
+    echo "$compile_output" >&2
+    return 1
+  fi
+
+  rm -f "$svg_target" >/dev/null 2>&1 || true
 
   for _ in 1 2 3 4 5 6 7 8 9 10; do
     [ -f "$target" ] && break

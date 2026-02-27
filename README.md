@@ -72,6 +72,7 @@ Service -> User: 回傳結果
 
 請確保以下指令在 `$PATH` 中可用：
 - `d2`
+- `rsvg-convert`（通常來自 `librsvg`，用於 SVG → PNG）
 - `inotifywait`（通常來自 `inotify-tools`）
 - `imv`、`imv-msg`
 

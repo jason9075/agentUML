@@ -17,6 +17,7 @@
 
         dev-bin = pkgs.writeShellScriptBin "agentuml-dev" ''
           export D2="${pkgs.d2}/bin/d2"
+          export RSVG_CONVERT="${pkgs.librsvg}/bin/rsvg-convert"
           export IMV="${pkgs.imv}/bin/imv"
           export IMV_MSG="${pkgs.imv}/bin/imv-msg"
           export INOTIFYWAIT="${pkgs.inotify-tools}/bin/inotifywait"
@@ -29,6 +30,7 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             d2
+            librsvg       # 提供 rsvg-convert：SVG → PNG
             imv           # Wayland 原生圖片預覽器
             inotify-tools # agentuml-dev 監聽 diagrams/ 所需
             dev-bin
