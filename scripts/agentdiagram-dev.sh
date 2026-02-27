@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# agentuml-dev — 單一程序：監聽 diagrams/ → 編譯 → 自動切換 imv 顯示最新圖
+# agentdiagram-dev — 單一程序：監聽 diagrams/ → 編譯 → 自動切換 imv 顯示最新圖
 #
 # 預設渲染工具：D2
 # 需求：d2、inotifywait(inotify-tools)、imv、imv-msg
@@ -56,13 +56,13 @@ compile_and_show() {
   mkdir -p "$(dirname "$target")"
 
   if ! compile_output=$("$D2" "$d2_file" "$svg_target" 2>&1); then
-    echo "agentUML: compile failed: $d2_file" >&2
+    echo "agentDiagram: compile failed: $d2_file" >&2
     echo "$compile_output" >&2
     return 1
   fi
 
   if ! compile_output=$("$RSVG_CONVERT" -f png -o "$target" "$svg_target" 2>&1); then
-    echo "agentUML: svg->png failed: $d2_file" >&2
+    echo "agentDiagram: svg->png failed: $d2_file" >&2
     echo "$compile_output" >&2
     return 1
   fi
@@ -75,13 +75,13 @@ compile_and_show() {
   done
 
   if [ ! -f "$target" ]; then
-    echo "agentUML: output not found: $target" >&2
+    echo "agentDiagram: output not found: $target" >&2
     return 1
   fi
 
   ensure_imv_running
   if ! open_image "$target"; then
-    echo "agentUML: imv-msg failed: $target" >&2
+    echo "agentDiagram: imv-msg failed: $target" >&2
     return 1
   fi
 }
@@ -94,7 +94,7 @@ if [ -n "$LATEST_D2" ]; then
   compile_and_show "$LATEST_D2" || true
 fi
 
-echo "agentUML: watching diagrams/ (D2 compile + preview in one process)"
+echo "agentDiagram: watching diagrams/ (D2 compile + preview in one process)"
 
 # 只監聽 diagrams/：
 #   close_write → .d2 被修改

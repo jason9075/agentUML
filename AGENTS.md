@@ -1,4 +1,4 @@
-# AGENTS.md — agentUML
+# AGENTS.md — agentDiagram
 
 Instructions for agentic coding agents operating in this repository.
 
@@ -6,7 +6,7 @@ Instructions for agentic coding agents operating in this repository.
 
 ## Project Overview
 
-agentUML is a **Nix Flake dev environment** for reactive diagram authoring.
+agentDiagram is a **Nix Flake dev environment** for reactive diagram authoring.
 D2 is the default renderer.
 It is not an application — there is no runtime code, no package.json, no build step.
 The entire project is orchestrated through `flake.nix`.
@@ -21,7 +21,7 @@ The entire project is orchestrated through `flake.nix`.
 ## Directory Structure
 
 ```
-agentUML/
+agentDiagram/
 ├── flake.nix        # Full environment definition (single source of truth)
 ├── flake.lock       # Pinned Nix input revisions — commit changes to this
 ├── guildlines       # Chinese-language workflow design doc (zh-TW)
@@ -31,7 +31,7 @@ agentUML/
 └── output/          # Generated PNG/SVG images (gitignored, auto-created)
 ```
 
-`diagrams/` and `output/` are not committed; `output/` is auto-created by `agentuml-dev`.
+`diagrams/` and `output/` are not committed; `output/` is auto-created by `agentdiagram-dev`.
 
 ---
 
@@ -55,18 +55,18 @@ These commands are exposed as binaries inside the dev shell:
 
 | Command | Purpose |
 |---|---|
-| `agentuml-dev` | Start D2 watch + preview |
+| `agentdiagram-dev` | Start D2 watch + preview |
 
 Run them in a single terminal (recommended):
 
 ```sh
-agentuml-dev
+agentdiagram-dev
 ```
 
 
 A `justfile` wraps all common tasks — run `just` to list targets.
 
-`agentuml-dev` no longer requires tmux.
+`agentdiagram-dev` no longer requires tmux.
 
 ---
 
@@ -98,7 +98,7 @@ Service -> User: response
 - **Indentation:** 2 spaces throughout.
 - **String literals:** Double-quoted Nix strings for short values; `''...''` (indented strings) for multi-line shell scripts.
 - **Comments:** Written in Traditional Chinese (zh-TW) for inline annotations; English for structural headings if needed.
-- **Attribute naming:** `camelCase` for Nix built-in attributes (`buildInputs`, `shellHook`, `devShells`). `kebab-case` for let-bindings and shell script bin names (e.g., `watch-script`, `agentuml-dev`).
+- **Attribute naming:** `camelCase` for Nix built-in attributes (`buildInputs`, `shellHook`, `devShells`). `kebab-case` for let-bindings and shell script bin names (e.g., `watch-script`, `agentdiagram-dev`).
 - **Input naming:** Use short, lowercase names (`nixpkgs`, `utils`).
 
 ### Adding a new tool
@@ -145,4 +145,4 @@ The following must **never** be committed:
 4. **Do not run `nix flake update`** unless explicitly asked — it changes `flake.lock` and could break reproducibility.
 5. **Diagram files are the work product.** Default output is D2: write a well-formed `.d2` file in `diagrams/` and confirm it renders to `output/`.
 6. **Respect zh-TW comments** in `flake.nix` — preserve them when editing surrounding code.
-7. **No test runner exists.** Manual verification means: run `agentuml-dev`, save a `.d2` file, confirm a `.png` appears in `output/`.
+7. **No test runner exists.** Manual verification means: run `agentdiagram-dev`, save a `.d2` file, confirm a `.png` appears in `output/`.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# agentuml-build-d2 — 一次性編譯所有 diagrams/ 下的 .d2 檔案
+# agentdiagram-build-d2 — 一次性編譯所有 diagrams/ 下的 .d2 檔案
 
 D2="${D2:-d2}"
 RSVG_CONVERT="${RSVG_CONVERT:-rsvg-convert}"
@@ -23,13 +23,13 @@ for d2_file in diagrams/**/*.d2; do
   svg_target="${target%.png}.tmp.svg"
 
   if ! compile_output=$("$D2" "$d2_file" "$svg_target" 2>&1); then
-    echo "agentUML: compile failed: $d2_file" >&2
+    echo "agentDiagram: compile failed: $d2_file" >&2
     echo "$compile_output" >&2
     exit 1
   fi
 
   if ! compile_output=$("$RSVG_CONVERT" -f png -o "$target" "$svg_target" 2>&1); then
-    echo "agentUML: svg->png failed: $d2_file" >&2
+    echo "agentDiagram: svg->png failed: $d2_file" >&2
     echo "$compile_output" >&2
     exit 1
   fi
@@ -38,5 +38,5 @@ for d2_file in diagrams/**/*.d2; do
 done
 
 if [ "$had_match" -eq 0 ]; then
-  echo "agentUML: no .d2 files found under diagrams/" >&2
+  echo "agentDiagram: no .d2 files found under diagrams/" >&2
 fi

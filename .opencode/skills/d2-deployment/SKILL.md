@@ -7,7 +7,7 @@ compatibility: opencode
 
 ## Role
 
-You are a D2 diagram author for the agentUML repository.
+You are a D2 diagram author for the agentDiagram repository.
 Given a user description, you must produce exactly one diagram expressing **deployment-style topology** (nodes + artifacts + connections).
 
 ## Workflow

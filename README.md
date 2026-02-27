@@ -1,4 +1,4 @@
-# agentUML
+# agentDiagram
 
 以 Nix Flake 驅動的響應式 Diagram-as-code 圖表開發環境（**D2**）。儲存 `.d2` 檔案，圖片立即自動更新。
 
@@ -17,21 +17,21 @@ just init
 just dev
 ```
 
-> 若你用 direnv（`use flake`）已進入 dev shell，`Justfile` 會直接跑 `agentuml-*`；否則才會自動用 `nix develop --command ...` 啟動環境。
+> 若你用 direnv（`use flake`）已進入 dev shell，`Justfile` 會直接跑 `agentdiagram-*`；否則才會自動用 `nix develop --command ...` 啟動環境。
 
 之後只要在 `diagrams/` 內儲存任何 `.d2` 檔案，`output/` 內的圖片就會自動更新，`imv` 預覽視窗同步切換。
 
-> `just dev` 會啟動 `agentuml-dev`：單一程序同時負責編譯與預覽。
+> `just dev` 會啟動 `agentdiagram-dev`：單一程序同時負責編譯與預覽。
 
 ### 預覽行為
 
-- `agentuml-dev` 會監聽 `diagrams/` 的 `.d2` 變更，編譯後用 `imv-msg` 自動切到對應的 `output/<name>.png`。
+- `agentdiagram-dev` 會監聽 `diagrams/` 的 `.d2` 變更，編譯後用 `imv-msg` 自動切到對應的 `output/<name>.png`。
 - 若你用 direnv 的 `use flake`（pure）修改了 `scripts/` 或 `flake.nix`，需要 `git add` + `direnv reload`，並重新執行 `just dev` 才會套用到新的 `/nix/store` wrapper。
 
 ## 目錄結構
 
 ```
-agentUML/
+agentDiagram/
 ├── flake.nix        # 環境定義（唯一事實來源）
 ├── flake.lock       # 鎖定的 Nix input 版本
 ├── Justfile         # 常用指令包裝
@@ -42,7 +42,7 @@ agentUML/
 
 ## 常用指令
 
-> 在沒有 direnv 的情況下，`Justfile` 會用 `nix develop --command ...` 呼叫 `agentuml-*` 指令。非 Nix 環境請參考下方「非 Nix 環境使用」。
+> 在沒有 direnv 的情況下，`Justfile` 會用 `nix develop --command ...` 呼叫 `agentdiagram-*` 指令。非 Nix 環境請參考下方「非 Nix 環境使用」。
 
 | 指令 | 說明 |
 |---|---|
@@ -83,7 +83,7 @@ Service -> User: 回傳結果
 mkdir -p diagrams output
 
 # 一鍵啟動（預設 D2）
-bash ./scripts/agentuml-dev.sh
+bash ./scripts/agentdiagram-dev.sh
 
 
 ```
