@@ -1,21 +1,21 @@
 🛠 實作指南 (Guidelines)
 1. 工作流設計
 
-    輸入 (Input): 在 opencode 中撰寫 PlantUML 語法並存為 .puml 或 .wsd 檔案。
+    輸入 (Input): 在 opencode 中撰寫 D2 語法並存為 .d2 檔案。
 
     監聽 (Watch): 使用 inotifywait 監控特定目錄下的檔案變動。
 
-    處理 (Process): 當檔案變動時，執行 plantuml 指令生成 .png 或 .svg。
+    處理 (Process): 當檔案變動時，執行 d2 指令生成 .png 或 .svg。
 
     輸出 (Output): 使用支援「自動重載」的圖片檢視器（如 feh 或 zathura）開啟產生的圖檔。
 
 2. 目錄結構建議
 Plaintext
 
-agentUML/
+agentDiagram/
 ├── flake.nix
 ├── flake.lock
-├── diagrams/        # 存放 .puml 原始檔
+├── diagrams/        # 存放 .d2 原始檔
 └── output/          # 存放生成的圖片 (建議加入 .gitignore)
 
 3. 自動化腳本策略
@@ -26,4 +26,4 @@ agentUML/
 
     尋找 diagrams/ 下的所有檔案。
 
-    觸發後執行 plantuml：plantuml --output-dir output <changed-file>。
+    觸發後執行 d2：d2 <changed-file.d2> output/<name>.png。

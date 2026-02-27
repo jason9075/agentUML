@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# agentuml-dev — 單一程序：監聽 diagrams/ → 編譯 → 自動切換 imv 顯示最新圖
+# agentdiagram-dev — 單一程序：監聽 diagrams/ → 編譯 → 自動切換 imv 顯示最新圖
 #
-# 需求：plantuml、inotifywait(inotify-tools)、imv、imv-msg
+# 預設渲染工具：D2
+# 需求：d2、inotifywait(inotify-tools)、imv、imv-msg
 
-PLANTUML="${PLANTUML:-plantuml}"
+D2="${D2:-d2}"
+RSVG_CONVERT="${RSVG_CONVERT:-rsvg-convert}"
 IMV="${IMV:-imv}"
 IMV_MSG="${IMV_MSG:-imv-msg}"
 INOTIFYWAIT="${INOTIFYWAIT:-inotifywait}"
@@ -41,17 +43,31 @@ open_image() {
 }
 
 compile_and_show() {
-  local puml_file="$1"
-  local basename
+  local d2_file="$1"
+  local relative
+  local svg_target
   local target
+  local compile_output
 
-  basename=$(basename "$puml_file" .puml)
-  target="output/$basename.png"
+  relative="${d2_file#diagrams/}"
+  target="output/${relative%.d2}.png"
+  svg_target="${target%.png}.tmp.svg"
 
-  if ! "$PLANTUML" -v --output-dir "$PWD/output" "$puml_file" >/dev/null 2>&1; then
-    echo "agentUML: compile failed: $puml_file" >&2
+  mkdir -p "$(dirname "$target")"
+
+  if ! compile_output=$("$D2" "$d2_file" "$svg_target" 2>&1); then
+    echo "agentDiagram: compile failed: $d2_file" >&2
+    echo "$compile_output" >&2
     return 1
   fi
+
+  if ! compile_output=$("$RSVG_CONVERT" -f png -o "$target" "$svg_target" 2>&1); then
+    echo "agentDiagram: svg->png failed: $d2_file" >&2
+    echo "$compile_output" >&2
+    return 1
+  fi
+
+  rm -f "$svg_target" >/dev/null 2>&1 || true
 
   for _ in 1 2 3 4 5 6 7 8 9 10; do
     [ -f "$target" ] && break
@@ -59,13 +75,13 @@ compile_and_show() {
   done
 
   if [ ! -f "$target" ]; then
-    echo "agentUML: output not found: $target" >&2
+    echo "agentDiagram: output not found: $target" >&2
     return 1
   fi
 
   ensure_imv_running
   if ! open_image "$target"; then
-    echo "agentUML: imv-msg failed: $target" >&2
+    echo "agentDiagram: imv-msg failed: $target" >&2
     return 1
   fi
 }
@@ -73,15 +89,15 @@ compile_and_show() {
 # 啟動 imv 並嘗試切到最新修改的圖
 ensure_imv_running
 
-LATEST_PUML=$(find diagrams -type f -name '*.puml' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-)
-if [ -n "$LATEST_PUML" ]; then
-  compile_and_show "$LATEST_PUML" || true
+LATEST_D2=$(find diagrams -type f -name '*.d2' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-)
+if [ -n "$LATEST_D2" ]; then
+  compile_and_show "$LATEST_D2" || true
 fi
 
-echo "agentUML: watching diagrams/ (compile + preview in one process)"
+echo "agentDiagram: watching diagrams/ (D2 compile + preview in one process)"
 
 # 只監聽 diagrams/：
-#   close_write → .puml 被修改
+#   close_write → .d2 被修改
 #   create/moved_to → atomic save 或新檔案
 #
 # 用去抖避免同一個檔案的連續事件造成重複編譯。
@@ -94,7 +110,7 @@ LAST_AT="0"
   2>/dev/null \
   | while read -r event filename; do
       case "$filename" in
-        *.puml)
+        *.d2)
           now=$(date +%s%3N 2>/dev/null || date +%s000)
           if [ "$filename" = "$LAST_FILE" ] && [ $((now - LAST_AT)) -lt 300 ]; then
             continue
