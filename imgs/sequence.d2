@@ -1,0 +1,102 @@
+# imgs/sequence.d2
+# agentDiagram workflow overview (sequence-style flow)
+#
+# 說明：
+# - 使用者用 opencode 輸入描述（Prompt）
+# - opencode（draw agent / d2-* skills）產生或修改 diagrams/<name>.d2
+# - agentdiagram-dev 透過 inotify 監聽變更
+# - D2 先輸出 SVG，再用 rsvg-convert 轉成 PNG
+# - 最後透過 imv-msg 自動切換預覽
+
+direction: right
+
+# 視覺：用 4 個階段分組，並排成兩欄
+ColumnLeft: {
+  label: ""
+  direction: down
+  style.stroke: "transparent"
+  style.fill: "transparent"
+  style.stroke-width: 0
+
+  Authoring: {
+    label: "Authoring"
+    direction: down
+    style.fill: "#F7F8FE"
+    style.stroke: "#0D32B2"
+    style.stroke-width: 2
+
+    User: {
+      shape: person
+      label: "User\n(opencode)"
+    }
+
+    Diagrams: {
+      label: "diagrams/*.d2"
+      shape: rectangle
+    }
+  }
+
+  Watch: {
+    label: "Watch + Build"
+    direction: down
+    style.fill: "#FFF7E6"
+    style.stroke: "#0D32B2"
+    style.stroke-width: 2
+
+    Dev: {
+      label: "agentdiagram-dev"
+      shape: rectangle
+    }
+  }
+}
+
+ColumnRight: {
+  label: ""
+  direction: down
+  style.stroke: "transparent"
+  style.fill: "transparent"
+  style.stroke-width: 0
+
+  Render: {
+    label: "Render"
+    direction: down
+    style.fill: "#EAF7FF"
+    style.stroke: "#0D32B2"
+    style.stroke-width: 2
+
+    D2: {
+      label: "d2\n(to SVG)"
+      shape: rectangle
+    }
+
+    Rsvg: {
+      label: "rsvg-convert\n(to PNG)"
+      shape: rectangle
+    }
+  }
+
+  Preview: {
+    label: "Preview"
+    direction: down
+    style.fill: "#F2F7F2"
+    style.stroke: "#0D32B2"
+    style.stroke-width: 2
+
+    Output: {
+      label: "output/*.png"
+      shape: rectangle
+    }
+
+    Imv: {
+      label: "imv\n(imv-msg)"
+      shape: rectangle
+    }
+  }
+}
+
+ColumnLeft.Authoring.User -> ColumnLeft.Authoring.Diagrams: "1) edit/save"
+ColumnLeft.Authoring.Diagrams -> ColumnLeft.Watch.Dev: "2) inotify"
+ColumnLeft.Watch.Dev -> ColumnRight.Render.D2: "3) render"
+ColumnRight.Render.D2 -> ColumnRight.Render.Rsvg: "4) convert"
+ColumnRight.Render.Rsvg -> ColumnRight.Preview.Output: "5) write"
+ColumnLeft.Watch.Dev -> ColumnRight.Preview.Imv: "6) imv-msg open"

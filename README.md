@@ -7,7 +7,7 @@
 - [Nix](https://nixos.org/download)（需啟用 Flakes）
 - Wayland 顯示環境（`imv` 預覽器使用）
 
-## 快速開始
+## 快速開始（建議：搭配 opencode）
 
 ```sh
 # 初始化目錄
@@ -16,6 +16,9 @@ just init
 # 一鍵啟動監聽 + 預覽
 just dev
 ```
+
+接著用 opencode 產生/修改圖表文字（`.d2`），例如使用 `draw` agent 或 `d2-*` skills，讓它把檔案寫到 `diagrams/`。
+存檔後 `agentdiagram-dev` 會自動編譯成 `output/<name>.png` 並切換 `imv` 預覽。
 
 > 若你用 direnv（`use flake`）已進入 dev shell，`Justfile` 會直接跑 `agentdiagram-*`；否則才會自動用 `nix develop --command ...` 啟動環境。
 
@@ -54,7 +57,7 @@ agentDiagram/
 
 ## 撰寫圖表
 
-在 `diagrams/` 建立 `.d2` 檔案（預設）：
+本專案建議用 opencode 生成/迭代 `diagrams/*.d2`（文字 → 圖），你也可以手動建立 `.d2` 檔案：
 
 ```d2
 # diagrams/my-diagram.d2
@@ -107,6 +110,12 @@ just dev
 ## Sample
 
 ### Workflow（Sequence）
+
+`agentdiagram-dev` 的本機工作流（建議搭配 opencode）：Prompt → 產生/修改 `.d2` → 自動編譯 → 自動預覽。
+
+- Source: `imgs/sequence.d2`
+- Output: `imgs/sequence.png`
+- Render: `d2 --layout elk --theme 303 imgs/sequence.d2 - | rsvg-convert -f png -o imgs/sequence.png -`
 
 ![SEQUENCE](./imgs/sequence.png)
 
